@@ -283,3 +283,5 @@ html { scroll-behavior: smooth; }
   outline-offset: 2px;
   border-radius: 6px;
 }
+
+canvas.dragging { cursor: grabbing !important; }
