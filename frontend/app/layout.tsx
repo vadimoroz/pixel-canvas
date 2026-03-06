@@ -32,7 +32,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" dir="ltr">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased" style={{ WebkitFontSmoothing: "antialiased" }}>{children}</body>
     </html>
   );
 }
