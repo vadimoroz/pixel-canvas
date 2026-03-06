@@ -15,3 +15,11 @@ export function truncateAddress(addr: string): string {
 export function hexToColor(hex: string): string {
   return hex.startsWith("#") ? hex : `#${hex}`;
 }
+
+export function explorerTxUrl(txid: string): string {
+  return `https://explorer.hiro.so/txid/${txid}?chain=mainnet`;
+}
+
+export function explorerAddressUrl(addr: string): string {
+  return `https://explorer.hiro.so/address/${addr}?chain=mainnet`;
+}
