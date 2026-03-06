@@ -24,7 +24,7 @@ export default function Navbar({ totalPixels }: { totalPixels: number }) {
   const balance = useBalance(address);
 
   return (
-    <nav className="glass-nav sticky top-0 z-50 h-16 flex items-center px-5 gap-4">
+    <nav className="glass-nav" aria-label="Main navigation sticky top-0 z-50 h-16 flex items-center px-5 gap-4">
       {/* Logo */}
       <div className="flex items-center gap-2.5 flex-shrink-0">
         <div
