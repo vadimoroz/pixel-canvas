@@ -1,3 +1,4 @@
+// sdk-rev: 1
 import { CanvasSize, Pixel, PlacePixelOptions } from './types';
 
 const CONTRACT_ADDRESS = 'SPQA4V5SGDWREAAAEH8WJHT2841Y6ANESQFXN8JH';
