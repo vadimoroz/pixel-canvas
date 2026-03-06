@@ -295,7 +295,7 @@ export default function Canvas({ pixels, selectedColor, onPixelClick, address, l
           <div style={{ transform: `translate(${pan.x}px,${pan.y}px)`, display: "inline-block" }}>
             <canvas
               ref={canvasRef}
-              className="pixel-canvas"
+              className="pixel-canvas" role="img" aria-label="Pixel canvas — click to place a pixel"
               style={{ cursor: address ? "crosshair" : "default" }}
               onMouseDown={onMouseDown}
               onMouseMove={onMouseMove}
