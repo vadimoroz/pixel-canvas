@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import { PixelData, CANVAS_WIDTH, CANVAS_HEIGHT } from "@/lib/canvas";
 
-const PIXEL_SIZE = 6; // px per cell at 1x zoom
+const PIXEL_SIZE = 5;
 
 interface CanvasProps {
   pixels: PixelData[];
@@ -15,21 +15,17 @@ interface CanvasProps {
 
 export default function Canvas({ pixels, selectedColor, onPixelClick, address, lastPlaced }: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [hoveredPixel, setHoveredPixel] = useState<{ x: number; y: number } | null>(null);
   const isDragging = useRef(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const panStart = useRef({ x: 0, y: 0 });
-
   const pixelMap = useRef<Map<string, string>>(new Map());
 
   useEffect(() => {
     const map = new Map<string, string>();
-    for (const p of pixels) {
-      map.set(`${p.x},${p.y}`, p.color);
-    }
+    for (const p of pixels) map.set(`${p.x},${p.y}`, p.color);
     pixelMap.current = map;
   }, [pixels]);
 
@@ -38,57 +34,58 @@ export default function Canvas({ pixels, selectedColor, onPixelClick, address, l
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    const w = CANVAS_WIDTH;
-    const h = CANVAS_HEIGHT;
     const ps = PIXEL_SIZE * zoom;
+    canvas.width = CANVAS_WIDTH * ps;
+    canvas.height = CANVAS_HEIGHT * ps;
 
-    canvas.width = w * ps;
-    canvas.height = h * ps;
-
-    // Background (empty pixels)
-    ctx.fillStyle = "#1a1a26";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Grid lines (subtle)
-    if (zoom >= 1.5) {
-      ctx.strokeStyle = "rgba(42,42,62,0.5)";
-      ctx.lineWidth = 0.5;
-      for (let x = 0; x <= w; x++) {
-        ctx.beginPath(); ctx.moveTo(x * ps, 0); ctx.lineTo(x * ps, h * ps); ctx.stroke();
-      }
-      for (let y = 0; y <= h; y++) {
-        ctx.beginPath(); ctx.moveTo(0, y * ps); ctx.lineTo(w * ps, y * ps); ctx.stroke();
+    // Empty bg — checkerboard subtle pattern
+    for (let x = 0; x < CANVAS_WIDTH; x++) {
+      for (let y = 0; y < CANVAS_HEIGHT; y++) {
+        const even = (x + y) % 2 === 0;
+        ctx.fillStyle = even ? "#0d0d1a" : "#0f0f1e";
+        ctx.fillRect(x * ps, y * ps, ps, ps);
       }
     }
 
-    // Painted pixels
+    // Grid lines at higher zoom
+    if (zoom >= 2) {
+      ctx.strokeStyle = "rgba(139,92,246,0.08)";
+      ctx.lineWidth = 0.5;
+      for (let x = 0; x <= CANVAS_WIDTH; x++) {
+        ctx.beginPath(); ctx.moveTo(x * ps, 0); ctx.lineTo(x * ps, CANVAS_HEIGHT * ps); ctx.stroke();
+      }
+      for (let y = 0; y <= CANVAS_HEIGHT; y++) {
+        ctx.beginPath(); ctx.moveTo(0, y * ps); ctx.lineTo(CANVAS_WIDTH * ps, y * ps); ctx.stroke();
+      }
+    }
+
+    // Pixels
     for (const [key, color] of pixelMap.current) {
       const [x, y] = key.split(",").map(Number);
       ctx.fillStyle = color;
       ctx.fillRect(x * ps, y * ps, ps, ps);
     }
 
-    // Hover highlight
-    if (hoveredPixel) {
-      ctx.fillStyle = selectedColor + "88";
+    // Hover
+    if (hoveredPixel && address) {
+      ctx.fillStyle = selectedColor + "66";
       ctx.fillRect(hoveredPixel.x * ps, hoveredPixel.y * ps, ps, ps);
-      ctx.strokeStyle = "#ffffff44";
+      ctx.strokeStyle = "rgba(255,255,255,0.5)";
       ctx.lineWidth = 1;
       ctx.strokeRect(hoveredPixel.x * ps + 0.5, hoveredPixel.y * ps + 0.5, ps - 1, ps - 1);
     }
 
-    // Last placed indicator
+    // Last placed glow
     if (lastPlaced) {
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 1.5;
       ctx.strokeRect(lastPlaced.x * ps + 1, lastPlaced.y * ps + 1, ps - 2, ps - 2);
     }
-  }, [pixels, selectedColor, hoveredPixel, zoom, lastPlaced]);
+  }, [pixels, selectedColor, hoveredPixel, zoom, lastPlaced, address]);
 
   useEffect(() => { draw(); }, [draw]);
 
-  const getPixelCoords = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const getCoords = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
     const rect = canvas.getBoundingClientRect();
@@ -99,99 +96,131 @@ export default function Canvas({ pixels, selectedColor, onPixelClick, address, l
     return { x, y };
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const onMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (isDragging.current) {
-      setPan({
-        x: panStart.current.x + (e.clientX - dragStart.current.x),
-        y: panStart.current.y + (e.clientY - dragStart.current.y),
-      });
+      setPan({ x: panStart.current.x + e.clientX - dragStart.current.x, y: panStart.current.y + e.clientY - dragStart.current.y });
       return;
     }
-    const coords = getPixelCoords(e);
-    setHoveredPixel(coords);
+    setHoveredPixel(getCoords(e));
   };
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (e.button === 1 || e.button === 2) {
+  const onMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (e.button !== 0) {
       isDragging.current = true;
       dragStart.current = { x: e.clientX, y: e.clientY };
       panStart.current = { ...pan };
     }
   };
 
-  const handleMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (isDragging.current) {
-      isDragging.current = false;
-      return;
-    }
+  const onMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (isDragging.current) { isDragging.current = false; return; }
     if (e.button === 0) {
-      const coords = getPixelCoords(e);
-      if (coords) onPixelClick(coords.x, coords.y);
+      const c = getCoords(e);
+      if (c) onPixelClick(c.x, c.y);
     }
   };
 
-  const handleWheel = (e: React.WheelEvent) => {
+  const onWheel = (e: React.WheelEvent) => {
     e.preventDefault();
-    const delta = e.deltaY > 0 ? 0.85 : 1.18;
-    setZoom((z) => Math.min(8, Math.max(0.5, z * delta)));
+    setZoom(z => Math.min(10, Math.max(0.4, z * (e.deltaY > 0 ? 0.88 : 1.14))));
   };
+
+  const zoomPct = Math.round(zoom * 100);
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* Zoom controls */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setZoom((z) => Math.max(0.5, z * 0.8))}
-          className="w-8 h-8 rounded-lg bg-[#12121a] border border-[#2a2a3e] text-white hover:border-violet-500 transition-colors text-sm font-bold"
+    <div className="flex flex-col gap-3 h-full">
+      {/* Toolbar */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <div
+          className="flex items-center rounded-xl overflow-hidden"
+          style={{ border: "1px solid rgba(139,92,246,0.2)", background: "rgba(13,13,26,0.8)" }}
         >
-          -
-        </button>
-        <span className="text-xs text-[#64748b] w-14 text-center">{Math.round(zoom * 100)}%</span>
-        <button
-          onClick={() => setZoom((z) => Math.min(8, z * 1.25))}
-          className="w-8 h-8 rounded-lg bg-[#12121a] border border-[#2a2a3e] text-white hover:border-violet-500 transition-colors text-sm font-bold"
-        >
-          +
-        </button>
+          <button
+            onClick={() => setZoom(z => Math.max(0.4, z * 0.8))}
+            className="px-3 py-1.5 text-sm font-bold transition-colors hover:text-white"
+            style={{ color: "#94a3b8", borderRight: "1px solid rgba(139,92,246,0.15)" }}
+          >
+            −
+          </button>
+          <span className="px-3 text-xs font-mono" style={{ color: "#a78bfa", minWidth: 52, textAlign: "center" }}>
+            {zoomPct}%
+          </span>
+          <button
+            onClick={() => setZoom(z => Math.min(10, z * 1.25))}
+            className="px-3 py-1.5 text-sm font-bold transition-colors hover:text-white"
+            style={{ color: "#94a3b8", borderLeft: "1px solid rgba(139,92,246,0.15)" }}
+          >
+            +
+          </button>
+        </div>
+
         <button
           onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
-          className="text-xs px-2 py-1.5 rounded-lg bg-[#12121a] border border-[#2a2a3e] text-[#64748b] hover:text-white hover:border-violet-500 transition-colors"
+          className="btn-ghost text-xs px-3 py-1.5 rounded-xl"
         >
           Reset
         </button>
+
         {hoveredPixel && (
-          <span className="text-xs text-[#64748b] ml-auto font-mono">
-            ({hoveredPixel.x}, {hoveredPixel.y})
+          <span className="ml-auto text-xs font-mono" style={{ color: "#6366f1" }}>
+            x:{hoveredPixel.x} y:{hoveredPixel.y}
           </span>
         )}
       </div>
 
-      {/* Canvas container */}
+      {/* Canvas frame */}
       <div
-        ref={containerRef}
-        className="overflow-auto rounded-xl border border-[#2a2a3e] bg-[#0a0a0f]"
-        style={{ maxHeight: "60vh", maxWidth: "100%" }}
-        onWheel={handleWheel as unknown as React.WheelEventHandler}
+        className="relative rounded-2xl overflow-hidden flex-1"
+        style={{
+          border: "1px solid rgba(139,92,246,0.25)",
+          boxShadow: "0 0 40px rgba(139,92,246,0.1), inset 0 0 40px rgba(0,0,0,0.4)",
+          background: "#0a0a18",
+          minHeight: 320,
+        }}
       >
-        <div style={{ transform: `translate(${pan.x}px, ${pan.y}px)`, display: "inline-block" }}>
-          <canvas
-            ref={canvasRef}
-            className="pixel-canvas block"
-            style={{ cursor: address ? "crosshair" : "not-allowed" }}
-            onMouseMove={handleMouseMove}
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={() => setHoveredPixel(null)}
-            onContextMenu={(e) => e.preventDefault()}
-          />
-        </div>
-      </div>
+        {/* Corner decorations */}
+        <div className="absolute top-2 left-2 w-3 h-3 border-t border-l rounded-tl" style={{ borderColor: "rgba(139,92,246,0.5)" }} />
+        <div className="absolute top-2 right-2 w-3 h-3 border-t border-r rounded-tr" style={{ borderColor: "rgba(139,92,246,0.5)" }} />
+        <div className="absolute bottom-2 left-2 w-3 h-3 border-b border-l rounded-bl" style={{ borderColor: "rgba(139,92,246,0.5)" }} />
+        <div className="absolute bottom-2 right-2 w-3 h-3 border-b border-r rounded-br" style={{ borderColor: "rgba(139,92,246,0.5)" }} />
 
-      {!address && (
-        <p className="text-center text-xs text-[#64748b]">
-          Connect your wallet to place pixels
-        </p>
-      )}
+        <div className="overflow-auto w-full h-full p-4" onWheel={onWheel as unknown as React.WheelEventHandler<HTMLDivElement>}>
+          <div style={{ transform: `translate(${pan.x}px,${pan.y}px)`, display: "inline-block" }}>
+            <canvas
+              ref={canvasRef}
+              className="pixel-canvas"
+              style={{
+                cursor: address ? "crosshair" : "default",
+                borderRadius: 4,
+                boxShadow: "0 4px 32px rgba(0,0,0,0.6)",
+              }}
+              onMouseMove={onMouseMove}
+              onMouseDown={onMouseDown}
+              onMouseUp={onMouseUp}
+              onMouseLeave={() => setHoveredPixel(null)}
+              onContextMenu={e => e.preventDefault()}
+            />
+          </div>
+        </div>
+
+        {/* No wallet overlay */}
+        {!address && (
+          <div
+            className="absolute inset-0 flex items-end justify-center pb-4 pointer-events-none"
+          >
+            <div
+              className="text-xs px-4 py-2 rounded-full"
+              style={{
+                background: "rgba(139,92,246,0.15)",
+                border: "1px solid rgba(139,92,246,0.3)",
+                color: "#a78bfa",
+              }}
+            >
+              Connect wallet to paint pixels
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

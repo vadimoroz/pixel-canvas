@@ -3,67 +3,83 @@
 import { useState } from "react";
 
 const PALETTE = [
-  // Row 1 - blacks/whites/grays
-  "#000000", "#1a1a1a", "#333333", "#555555", "#777777", "#999999", "#bbbbbb", "#dddddd", "#ffffff",
-  // Row 2 - reds/pinks
-  "#ff0000", "#cc0000", "#880000", "#ff4444", "#ff88aa", "#ff0066", "#cc0044", "#880033", "#ff69b4",
-  // Row 3 - oranges/yellows
-  "#ff6600", "#ff8800", "#ffaa00", "#ffcc00", "#ffee00", "#ffff00", "#cccc00", "#888800", "#ffe066",
-  // Row 4 - greens
-  "#00ff00", "#00cc00", "#008800", "#004400", "#44ff44", "#00ff88", "#00cc66", "#006633", "#88ff88",
-  // Row 5 - blues/cyans
-  "#0000ff", "#0000cc", "#000088", "#4444ff", "#8888ff", "#00ffff", "#00cccc", "#006666", "#88eeff",
-  // Row 6 - purples/magentas
-  "#8800ff", "#6600cc", "#440088", "#aa44ff", "#cc88ff", "#ff00ff", "#cc00cc", "#880088", "#ff88ff",
-  // Row 7 - browns/skin tones
-  "#8b4513", "#a0522d", "#cd853f", "#d2691e", "#f4a460", "#deb887", "#ffe4b5", "#ffd700", "#b8860b",
-  // Row 8 - special
-  "#ff4500", "#ff6347", "#20b2aa", "#4169e1", "#9370db", "#3cb371", "#dc143c", "#1e90ff", "#ff1493",
+  "#000000","#ffffff","#94a3b8","#475569","#1e293b","#0f172a",
+  "#ef4444","#f97316","#eab308","#22c55e","#06b6d4","#3b82f6",
+  "#8b5cf6","#ec4899","#f43f5e","#10b981","#0ea5e9","#6366f1",
+  "#fca5a5","#fdba74","#fde68a","#86efac","#67e8f9","#93c5fd",
+  "#c4b5fd","#f9a8d4","#fecdd3","#6ee7b7","#a5f3fc","#bfdbfe",
+  "#7f1d1d","#7c2d12","#713f12","#14532d","#164e63","#1e3a8a",
+  "#4c1d95","#831843","#881337","#064e3b","#0c4a6e","#312e81",
+  "#dc2626","#ea580c","#ca8a04","#16a34a","#0891b2","#2563eb",
 ];
 
-interface PaletteProps {
-  selected: string;
-  onSelect: (color: string) => void;
-}
-
-export default function Palette({ selected, onSelect }: PaletteProps) {
-  const [custom, setCustom] = useState("#7c3aed");
+export default function Palette({ selected, onSelect }: { selected: string; onSelect: (c: string) => void }) {
+  const [custom, setCustom] = useState("#8b5cf6");
 
   return (
-    <div className="bg-[#12121a] border border-[#2a2a3e] rounded-xl p-4">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-medium text-[#64748b] uppercase tracking-wider">Color Palette</span>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-[#64748b]">Custom:</span>
-          <input
-            type="color"
-            value={custom}
-            onChange={(e) => { setCustom(e.target.value); onSelect(e.target.value); }}
-            className="w-7 h-7 rounded cursor-pointer border-0 bg-transparent"
-          />
-        </div>
+    <div
+      className="rounded-2xl p-4 flex flex-col gap-3"
+      style={{
+        background: "rgba(13,13,26,0.9)",
+        border: "1px solid rgba(139,92,246,0.18)",
+        boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
+      }}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#6366f1" }}>
+          Palette
+        </span>
+        <label className="flex items-center gap-1.5 cursor-pointer">
+          <span className="text-[10px]" style={{ color: "#64748b" }}>Custom</span>
+          <div className="relative">
+            <input
+              type="color"
+              value={custom}
+              onChange={e => { setCustom(e.target.value); onSelect(e.target.value); }}
+              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+            />
+            <div
+              className="w-6 h-6 rounded-lg border-2"
+              style={{
+                backgroundColor: custom,
+                borderColor: custom === selected ? "rgba(255,255,255,0.8)" : "transparent",
+                boxShadow: custom === selected ? "0 0 0 1px rgba(139,92,246,0.8)" : "none",
+              }}
+            />
+          </div>
+        </label>
       </div>
 
-      <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(9, 1fr)" }}>
-        {PALETTE.map((color) => (
+      {/* Swatches */}
+      <div className="grid gap-1.5" style={{ gridTemplateColumns: "repeat(6,1fr)" }}>
+        {PALETTE.map(color => (
           <button
             key={color}
             onClick={() => onSelect(color)}
-            className={`color-swatch w-7 h-7 rounded-md relative ${selected === color ? "selected" : ""}`}
+            className={`swatch w-full aspect-square rounded-lg ${selected === color ? "active" : ""}`}
             style={{ backgroundColor: color }}
             title={color}
           />
         ))}
       </div>
 
-      <div className="mt-3 flex items-center gap-3">
+      {/* Selected preview */}
+      <div
+        className="flex items-center gap-3 p-2.5 rounded-xl"
+        style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.12)" }}
+      >
         <div
-          className="w-10 h-10 rounded-lg border-2 border-[#2a2a3e] flex-shrink-0"
-          style={{ backgroundColor: selected }}
+          className="w-9 h-9 rounded-xl flex-shrink-0"
+          style={{
+            backgroundColor: selected,
+            boxShadow: `0 0 16px ${selected}66`,
+            border: "2px solid rgba(255,255,255,0.1)",
+          }}
         />
         <div>
-          <p className="text-xs text-[#64748b]">Selected</p>
-          <p className="text-sm font-mono text-white">{selected.toUpperCase()}</p>
+          <p className="text-[10px]" style={{ color: "#64748b" }}>Selected color</p>
+          <p className="text-sm font-mono font-semibold text-white">{selected.toUpperCase()}</p>
         </div>
       </div>
     </div>

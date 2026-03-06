@@ -7,46 +7,82 @@ export default function Header({ totalPixels }: { totalPixels: number }) {
   const { address, connect, disconnect, mounted } = useStacks();
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 border-b border-[#2a2a3e] bg-[#0a0a0f]/80 backdrop-blur-sm sticky top-0 z-50">
+    <header
+      className="sticky top-0 z-50 flex items-center justify-between px-5 py-3"
+      style={{
+        background: "rgba(5,5,15,0.75)",
+        backdropFilter: "blur(20px)",
+        borderBottom: "1px solid rgba(139,92,246,0.12)",
+      }}
+    >
+      {/* Logo */}
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center text-sm font-bold">
-          P
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center text-base font-black select-none"
+          style={{
+            background: "linear-gradient(135deg, #8b5cf6, #ec4899)",
+            boxShadow: "0 0 20px rgba(139,92,246,0.4)",
+          }}
+        >
+          ⬛
         </div>
         <div>
-          <h1 className="font-bold text-white leading-none">Pixel Canvas</h1>
-          <p className="text-xs text-[#64748b] leading-none mt-0.5">on Stacks blockchain</p>
+          <p className="font-bold text-white text-sm leading-none tracking-tight">Pixel Canvas</p>
+          <p className="text-[10px] leading-none mt-0.5" style={{ color: "#6366f1" }}>
+            on Stacks blockchain
+          </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="hidden sm:flex items-center gap-2 bg-[#12121a] border border-[#2a2a3e] rounded-lg px-3 py-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse-slow" />
-          <span className="text-xs text-[#64748b]">
-            <span className="text-white font-medium">{totalPixels.toLocaleString()}</span> pixels placed
-          </span>
-        </div>
+      {/* Center badge */}
+      <div
+        className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full"
+        style={{
+          background: "rgba(139,92,246,0.08)",
+          border: "1px solid rgba(139,92,246,0.2)",
+        }}
+      >
+        <span className="pulse-dot w-1.5 h-1.5 rounded-full" style={{ background: "#a78bfa" }} />
+        <span className="text-xs" style={{ color: "#94a3b8" }}>
+          <span className="font-semibold" style={{ color: "#e2e8f0" }}>
+            {totalPixels.toLocaleString()}
+          </span>{" "}
+          pixels painted
+        </span>
+      </div>
 
-        {mounted && (
-          address ? (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-[#64748b] hidden sm:block">{truncateAddress(address)}</span>
-              <button
-                onClick={disconnect}
-                className="text-xs px-3 py-1.5 rounded-lg border border-[#2a2a3e] text-[#64748b] hover:text-white hover:border-[#7c3aed] transition-colors"
+      {/* Wallet */}
+      {mounted && (
+        <div className="flex items-center gap-2">
+          {address ? (
+            <>
+              <div
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs"
+                style={{
+                  background: "rgba(139,92,246,0.08)",
+                  border: "1px solid rgba(139,92,246,0.2)",
+                  color: "#a78bfa",
+                }}
               >
+                <span
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
+                  style={{ background: "linear-gradient(135deg,#8b5cf6,#ec4899)" }}
+                >
+                  ✓
+                </span>
+                {truncateAddress(address)}
+              </div>
+              <button onClick={disconnect} className="btn-ghost text-xs px-3 py-1.5">
                 Disconnect
               </button>
-            </div>
+            </>
           ) : (
-            <button
-              onClick={connect}
-              className="text-sm px-4 py-2 rounded-lg bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-500 hover:to-violet-400 text-white font-medium transition-all shadow-lg shadow-violet-900/30"
-            >
+            <button onClick={connect} className="btn-primary text-xs px-4 py-2">
               Connect Wallet
             </button>
-          )
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </header>
   );
 }
