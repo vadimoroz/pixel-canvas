@@ -285,3 +285,9 @@ html { scroll-behavior: smooth; }
 }
 
 canvas.dragging { cursor: grabbing !important; }
+
+/* dot pattern bg */
+.bg-dots {
+  background-image: radial-gradient(circle, rgba(99,102,241,0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
