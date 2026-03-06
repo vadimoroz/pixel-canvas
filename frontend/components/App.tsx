@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Header from "@/components/Header";
+import Navbar from "@/components/Navbar";
 import Canvas from "@/components/Canvas";
-import Palette from "@/components/Palette";
-import Stats from "@/components/Stats";
-import PlacePixelModal from "@/components/PlacePixelModal";
+import ColorPanel from "@/components/ColorPanel";
+import Sidebar from "@/components/Sidebar";
 import { useStacks } from "@/hooks/useStacks";
 import { fetchCanvasPixels, getTotalPixels, PixelData } from "@/lib/canvas";
 
@@ -13,9 +12,10 @@ export default function App() {
   const { address } = useStacks();
   const [pixels, setPixels] = useState<PixelData[]>([]);
   const [totalPixels, setTotalPixels] = useState(0);
-  const [selectedColor, setSelectedColor] = useState("#8b5cf6");
-  const [modal, setModal] = useState<{ x: number; y: number } | null>(null);
+  const [selectedColor, setSelectedColor] = useState("#6366f1");
+  const [panel, setPanel] = useState<{ x: number; y: number; sx: number; sy: number } | null>(null);
   const [lastPlaced, setLastPlaced] = useState<{ x: number; y: number } | null>(null);
+  const [heatmap, setHeatmap] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const loadCanvas = useCallback(async () => {
@@ -32,86 +32,92 @@ export default function App() {
     return () => clearInterval(id);
   }, [loadCanvas]);
 
-  const handlePixelClick = (x: number, y: number) => {
+  const handlePixelClick = (x: number, y: number, sx: number, sy: number) => {
     if (!address) return;
-    setModal({ x, y });
+    setPanel({ x, y, sx, sy });
   };
 
-  const handleSuccess = () => {
-    if (modal) setLastPlaced({ x: modal.x, y: modal.y });
-    setTimeout(loadCanvas, 3000);
+  const handleSuccess = (x: number, y: number) => {
+    setLastPlaced({ x, y });
+    setTimeout(loadCanvas, 4000);
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#05050f" }}>
-      {/* Ambient orbs */}
-      <div
-        className="bg-orb"
-        style={{ width: 500, height: 500, top: -150, left: -100, background: "rgba(139,92,246,0.06)" }}
-      />
-      <div
-        className="bg-orb"
-        style={{ width: 400, height: 400, bottom: -100, right: -80, background: "rgba(236,72,153,0.04)" }}
-      />
+    <div className="min-h-screen flex flex-col" style={{ minHeight: "100dvh" }}>
+      <Navbar totalPixels={totalPixels} />
 
-      <Header totalPixels={totalPixels} />
-
-      <main className="relative z-10 flex-1 flex flex-col xl:flex-row" style={{ minHeight: 0 }}>
+      <div className="flex flex-1 overflow-hidden">
         {/* Canvas area */}
-        <div className="flex-1 flex flex-col p-4 xl:p-6 min-w-0 gap-3">
-          {/* Canvas label */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <span
-                className="text-xs font-semibold px-2.5 py-1 rounded-full"
+        <main className="flex-1 flex flex-col p-4 gap-3 min-w-0 overflow-hidden">
+          {/* Top bar info */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="badge">
+              <span className="text-[10px]">200 × 100 canvas</span>
+            </div>
+            <div className="badge" style={{ background: "rgba(168,85,247,0.07)", borderColor: "rgba(168,85,247,0.2)", color: "#8b5cf6" }}>
+              <span>scroll to zoom · drag to pan</span>
+            </div>
+            {selectedColor && (
+              <div
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border"
                 style={{
-                  background: "rgba(139,92,246,0.1)",
-                  border: "1px solid rgba(139,92,246,0.2)",
-                  color: "#a78bfa",
+                  background: "rgba(255,255,255,0.7)",
+                  borderColor: "rgba(99,102,241,0.15)",
+                  color: "#1e1b4b",
                 }}
               >
-                200 × 100
-              </span>
-              <span className="text-xs" style={{ color: "#334155" }}>
-                scroll to zoom · right-drag to pan
-              </span>
-            </div>
+                <div className="w-3.5 h-3.5 rounded-full border border-white/80" style={{ backgroundColor: selectedColor }} />
+                <span>{selectedColor.toUpperCase()}</span>
+              </div>
+            )}
             {loading && (
-              <div className="ml-auto flex items-center gap-1.5">
-                <span className="pulse-dot w-1.5 h-1.5 rounded-full" style={{ background: "#6366f1" }} />
-                <span className="text-xs" style={{ color: "#475569" }}>Loading…</span>
+              <div className="ml-auto flex items-center gap-1.5 text-[11px]" style={{ color: "#94a3b8" }}>
+                <svg className="animate-spin" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <circle cx="6" cy="6" r="5" stroke="rgba(99,102,241,0.2)" strokeWidth="2"/>
+                  <path d="M11 6A5 5 0 001 6" stroke="#6366f1" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+                Syncing…
               </div>
             )}
           </div>
 
-          {/* Canvas fills remaining height */}
-          <div className="flex-1" style={{ minHeight: 360 }}>
+          {/* Canvas */}
+          <div className="flex-1 glass rounded-2xl p-3 overflow-hidden" style={{ minHeight: 0 }}>
             <Canvas
               pixels={pixels}
               selectedColor={selectedColor}
               onPixelClick={handlePixelClick}
               address={address}
               lastPlaced={lastPlaced}
+              heatmap={heatmap}
             />
           </div>
-        </div>
+        </main>
 
         {/* Sidebar */}
-        <div
-          className="xl:w-72 p-4 xl:p-5 flex flex-col gap-3 xl:overflow-y-auto"
-          style={{ borderLeft: "1px solid rgba(139,92,246,0.1)" }}
+        <aside
+          className="hidden lg:flex flex-col w-72 p-4 overflow-hidden"
+          style={{ borderLeft: "1px solid rgba(99,102,241,0.1)" }}
         >
-          <Palette selected={selectedColor} onSelect={setSelectedColor} />
-          <Stats pixels={pixels} totalPixels={totalPixels} userAddress={address} />
-        </div>
-      </main>
+          <Sidebar
+            pixels={pixels}
+            totalPixels={totalPixels}
+            userAddress={address}
+            heatmap={heatmap}
+            onHeatmapToggle={() => setHeatmap(h => !h)}
+            loading={loading}
+          />
+        </aside>
+      </div>
 
-      {modal && address && (
-        <PlacePixelModal
-          x={modal.x}
-          y={modal.y}
-          color={selectedColor}
-          onClose={() => setModal(null)}
+      {/* Floating color panel */}
+      {panel && address && (
+        <ColorPanel
+          x={panel.x}
+          y={panel.y}
+          screenX={panel.sx}
+          screenY={panel.sy}
+          onClose={() => setPanel(null)}
           onSuccess={handleSuccess}
         />
       )}
