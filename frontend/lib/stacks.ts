@@ -1,3 +1,4 @@
+// updated: 2026-03-06
 import { STACKS_MAINNET } from "@stacks/network";
 
 export const NETWORK = STACKS_MAINNET;
