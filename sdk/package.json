@@ -1,0 +1,19 @@
+{
+  "name": "pixel-canvas-sdk",
+  "version": "1.0.0",
+  "description": "SDK for the Pixel Canvas on-chain contract (Stacks)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": ["stacks", "blockchain", "pixel", "canvas", "nft"],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@stacks/transactions": "^6.0.0"
+  }
+}
