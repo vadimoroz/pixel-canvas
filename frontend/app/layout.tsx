@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+} as const;
+
 export const metadata: Metadata = {
   title: "Pixel Canvas — Paint on the Blockchain",
   description: "Place pixels on a shared 200×100 on-chain canvas on Stacks. Every pixel is a blockchain transaction — paint your mark permanently on-chain.",
