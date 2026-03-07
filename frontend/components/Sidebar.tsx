@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useEffect, useState, useRef } from "react";
+import { useMemo, useEffect, useState, useRef, memo } from "react";
 import { PixelData, CANVAS_WIDTH, CANVAS_HEIGHT } from "@/lib/canvas";
 import { truncateAddress } from "@/lib/stacks";
 
@@ -32,7 +32,7 @@ function getLeaderboard(pixels: PixelData[]) {
 const rankColors = ["#f59e0b", "#94a3b8", "#cd7c2f"];
 const rankLabels = ["🥇", "🥈", "🥉"];
 
-export default function Sidebar({ pixels, totalPixels, userAddress, heatmap, onHeatmapToggle, loading }: SidebarProps) {
+function Sidebar({ pixels, totalPixels, userAddress, heatmap, onHeatmapToggle, loading }: SidebarProps) {
   const leaderboard = useMemo(() => getLeaderboard(pixels), [pixels]);
   const userCount = useMemo(() => pixels.filter(p => p.owner === userAddress).length, [pixels, userAddress]);
   const [currentBlock, setCurrentBlock] = useState(0);
@@ -264,3 +264,5 @@ export default function Sidebar({ pixels, totalPixels, userAddress, heatmap, onH
     </div>
   );
 }
+
+export default memo(Sidebar);
