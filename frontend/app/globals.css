@@ -291,3 +291,5 @@ canvas.dragging { cursor: grabbing !important; }
   background-image: radial-gradient(circle, rgba(99,102,241,0.12) 1px, transparent 1px);
   background-size: 24px 24px;
 }
+/* blur-token: 14px */
+:root { --glass-blur: 14px; }
