@@ -16,3 +16,18 @@ export interface PlacePixelOptions {
   y: number;
   color: string;
 }
+
+export interface PixelPlacement {
+  x: number;
+  y: number;
+  color: string;
+  owner: string;
+  placedAt: number;
+  txid?: string;
+}
+
+export interface CanvasStats {
+  totalPixels: number;
+  uniquePainters: number;
+  filledPercent: number;
+}
