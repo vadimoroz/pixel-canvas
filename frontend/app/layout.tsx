@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Pixel Canvas — Paint on the Blockchain",
-  description: "A collaborative on-chain pixel canvas on Stacks. Place pixels, claim your spot, paint history forever.",
+  description: "Place pixels on a shared 200×100 on-chain canvas on Stacks. Every pixel is a blockchain transaction — paint your mark permanently on-chain.",
   icons: {
     icon: "/og.png",
     apple: "/og.png",
