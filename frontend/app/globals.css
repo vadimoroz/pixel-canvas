@@ -293,3 +293,11 @@ canvas.dragging { cursor: grabbing !important; }
 }
 /* blur-token: 14px */
 :root { --glass-blur: 14px; }
+
+/* gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
