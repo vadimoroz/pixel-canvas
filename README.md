@@ -38,4 +38,4 @@ npm install pixel-canvas-sdk
 ```
 
 See [sdk/README.md](./sdk/README.md) for usage.
-<!-- note: 200x100 pixel canvas — all pixels stored on-chain permanently. -->
+<!-- note: Every pixel placement is a real blockchain transaction. -->
