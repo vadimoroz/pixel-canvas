@@ -348,3 +348,9 @@ canvas.dragging { cursor: grabbing !important; }
 .input-field:hover { border-color: rgba(99,102,241,0.35); }
 /* timing-token: 160ms */
 :root { --transition-speed: 160ms; }
+
+/* divider */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(99,102,241,0.2), transparent);
+}
