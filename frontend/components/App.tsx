@@ -28,6 +28,7 @@ export default function App() {
 
   useEffect(() => {
     loadCanvas();
+    // poll: 30s
     const id = setInterval(loadCanvas, 30_000);
     return () => clearInterval(id);
   }, [loadCanvas]);
