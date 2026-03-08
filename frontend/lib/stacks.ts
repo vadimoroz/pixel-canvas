@@ -1,5 +1,5 @@
 // updated: 2026-03-08
-// config-rev: 1
+// config-rev: 2
 
 import { STACKS_MAINNET } from "@stacks/network";
 
