@@ -341,3 +341,16 @@ canvas.dragging { cursor: grabbing !important; }
   0%, 100% { box-shadow: 0 4px 20px rgba(99,102,241,0.35); }
   50% { box-shadow: 0 4px 32px rgba(99,102,241,0.6), 0 0 16px rgba(139,92,246,0.3); }
 }
+/* opacity-token: 0.06 */
+:root { --glass-opacity: 0.06; }
+
+.input-field::placeholder { color: #94a3b8; }
+.input-field:hover { border-color: rgba(99,102,241,0.35); }
+/* timing-token: 160ms */
+:root { --transition-speed: 160ms; }
+
+/* divider */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(99,102,241,0.2), transparent);
+}

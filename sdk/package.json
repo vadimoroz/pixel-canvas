@@ -15,7 +15,10 @@
     "blockchain",
     "pixel",
     "canvas",
-    "nft"
+    "web3",
+    "nft",
+    "clarity",
+    "bitcoin"
   ],
   "license": "MIT",
   "devDependencies": {

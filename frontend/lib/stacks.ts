@@ -1,5 +1,6 @@
-// config-rev: 1
-// updated: 2026-03-06
+// updated: 2026-03-08
+// config-rev: 2
+
 import { STACKS_MAINNET } from "@stacks/network";
 
 export const NETWORK = STACKS_MAINNET;
